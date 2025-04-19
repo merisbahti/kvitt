@@ -34,21 +34,17 @@ const splitPayments = <Keys extends string>(contributions: Record<Keys, number>)
     for (const [payer, totalToPay] of R.entries.strict(diffs)) {
         for (const [borrower, initial] of R.entries.strict(debtsFrom)) {
             const payerBalance = getBalanceFor(payer)
-            console.log(`payer: ${payer}, borrower: ${borrower} payerBalance: ${payerBalance}`)
             if (payerBalance >= 0) {
-                console.log('skipping payer', payer)
                 continue
             }
 
             const borrowerBalance = getBalanceFor(borrower)
 
             if (borrowerBalance <= 0) {
-                console.log('skipping borrower', borrower)
                 continue
             }
 
             const amountToPay = Math.min(-payerBalance, borrowerBalance)
-            console.log(`payer: ${payer} borrower: ${borrower} amountToPay: ${amountToPay}`)
             debtsFrom[payer] = {...debtsFrom[payer], [borrower]: amountToPay}
         }
 
@@ -75,18 +71,19 @@ test('splits wisely', () => {
 
 test('three way example', () => {
     const simpleExample = {
-        'meris': 300,
-        'henrietta': 150,
-        'sara': 50
+        'meris': 7,
+        'henrietta': 2,
+        'sara': 0
     }
     const output = splitPayments(simpleExample)
-    expect(output.averageCost).toEqual(500 / 3)
-    expect(output.diffs.henrietta).toEqual(500 / 3 - 150)
-    expect(output.diffs.meris).toEqual(500 / 3 - 300)
-    expect(output.diffs.sara).toEqual(500 / 3 - 50)
+    expect(output.averageCost).toEqual(3)
+    expect(output.diffs.henrietta).toEqual(1)
+    expect(output.diffs.meris).toEqual(-4)
+    expect(output.diffs.sara).toEqual(3)
     expect(output.debtsFrom).toEqual({
-        'meris': {henrietta: (500 / 3 - 150), sara: (500 / 3 - 50)},
+        'meris': {henrietta: 1, sara: 3},
         'henrietta': {},
         'sara': {}
     })
 })
+
