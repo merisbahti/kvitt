@@ -119,13 +119,27 @@ test('splits wisely', () => {
 
 })
 
-test('three way example', () => {
-    const simpleExample = {
-        'meris': 7,
-        'henrietta': 2,
-        'sara': 0
-    }
+test('simple three way example', () => {
 
+    const output = splitPayments(['meris', 'henrietta', 'sara'], [{from: 'meris', amount: 9}])
+    expect(output.initialBalance).toEqual({
+        henrietta: 3,
+        meris: -6,
+        sara: 3,
+    })
+    expect(output.paymentsForBalance).toEqual(
+        [
+            {from: 'henrietta', to: 'meris', payment: 3},
+            {
+                from: 'sara',
+                to: 'meris',
+                payment: 3
+            },])
+
+})
+
+
+test('three way example', () => {
 
     const output = splitPayments(['meris', 'henrietta', 'sara'], [{from: 'meris', amount: 7}, {
         from: 'henrietta',
