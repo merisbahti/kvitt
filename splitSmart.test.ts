@@ -39,6 +39,7 @@ const splitPayments = (
       payment,
     }));
   });
+
   const initialBalance = getBalance(database);
 
   const paymentsForBalance: Database = [];
@@ -54,7 +55,7 @@ const splitPayments = (
 
     // find min and max
 
-    const extemes = Object.entries(currentBalance).reduce(
+    const extremes = Object.entries(currentBalance).reduce(
       (acc, tuple) => {
         const [name, value] = tuple as [string, number];
         if (value === 0) {
@@ -73,19 +74,21 @@ const splitPayments = (
     );
 
     if (
-      !extemes.min ||
-      !extemes.max ||
-      extemes.max.person === extemes.min.person
+      !extremes.min ||
+      !extremes.max ||
+      extremes.max.person === extremes.min.person
     ) {
       break;
     }
 
     paymentsForBalance.push({
-      from: extemes.max.person,
-      to: extemes.min.person,
-      payment: Math.abs(Math.max(extemes.min.value, extemes.max.value)),
+      from: extremes.max.person,
+      to: extremes.min.person,
+      payment: Math.min(
+        Math.abs(extremes.min.value),
+        Math.abs(extremes.max.value),
+      ),
     });
-
     currentBalance = getBalance([...database, ...paymentsForBalance]);
   }
 
@@ -178,23 +181,42 @@ test("three way example", () => {
       to: "meris",
       payment: 3,
     },
-    { from: "henrietta", to: "meris", payment: 1.0000000000000004 },
+    { from: "henrietta", to: "meris", payment: 1 },
   ]);
 });
 
-test.skip("real world test", () => {
+test("real world test", () => {
   const simpleExample = {
     tommy: 150,
     karin: 150,
     kina: 600,
     henrietta: 242.5 + 88,
     meris: 242.5 + 88,
-    sara: 450,
+    sara: 650,
     anna: 595,
     jens: 595,
     alex: 0,
+    mgk: 0,
   };
-  const output = splitPayments(simpleExample);
-  expect(output.averageCost).toEqual(355.6666666666667);
-  expect(output.debtsFrom).toEqual({});
+  const total = Object.values(simpleExample).reduce((acc, x) => acc + x, 0);
+  const average = total / Object.keys(simpleExample).length;
+  const output = splitPayments(
+    Object.keys(simpleExample),
+    Object.entries(simpleExample).map(([from, amount]) => ({ from, amount })),
+  );
+  expect(total).toBe(3401);
+  expect(average).toBe(340.1);
+  // expect(output.initialBalance).toEqual({
+  //   alex: 355.66666666666663,
+  //   anna: -239.33333333333334,
+  //   henrietta: 25.166666666666657,
+  //   jens: -239.33333333333337,
+  //   karin: 205.66666666666666,
+  //   kina: -244.33333333333346,
+  //   meris: 25.166666666666657,
+  //   sara: -94.33333333333331,
+  //   tommy: 205.66666666666666,
+  // });
+
+  expect(output.paymentsForBalance).toEqual([]);
 });
