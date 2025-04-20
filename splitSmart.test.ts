@@ -1,71 +1,86 @@
 import * as R from 'remeda'
 import {test, expect} from 'bun:test'
 
-const splitPayments = <Keys extends string>(contributions: Record<Keys, number>): {
-    averageCost: number,
-    diffs: Record<Keys, number>,
-    debtsFrom: Record<Keys, Partial<Record<Keys, number>>>
-} => {
+type Database = Array<{ from: string, to: string, payment: number }>;
 
-    const averageCost = R.pipe(
-        contributions,
-        R.values,
-        R.sum(),
-        (n) => R.divide(n, R.length(R.keys(contributions)))
-    )
-
-    const diffs = R.pipe(
-        contributions,
-        R.mapValues((value) => averageCost - value)
-    ) as unknown as Record<Keys, number>
-
-    type DebtValue = Partial<Record<Keys, number>>
-    const debtsFrom = Object.fromEntries(Object.keys(contributions).map(x => [x, {}] as const)) as unknown as { [key in Keys]: DebtValue }
-    const getBalanceFor = (name: Keys) => {
-        const diff = diffs[name] // negative means they owe money
-
-
-        const debtsForName = R.sum(R.values(Object.values(debtsFrom[name]) as DebtValue) as number[])
-
-        return diff + debtsForName // this is the balance for the name, we want it to be 0
-    }
-
-
-    for (const [payer, totalToPay] of R.entries.strict(diffs)) {
-        for (const [borrower, initial] of R.entries.strict(debtsFrom)) {
-            const payerBalance = getBalanceFor(payer)
-            if (payerBalance >= 0) {
-                continue
-            }
-
-            const borrowerBalance = getBalanceFor(borrower)
-
-            if (borrowerBalance <= 0) {
-                continue
-            }
-
-            const amountToPay = Math.min(-payerBalance, borrowerBalance)
-            debtsFrom[payer] = {...debtsFrom[payer], [borrower]: amountToPay}
-        }
-
-    }
-
-
-    return {averageCost, diffs, debtsFrom}
+const getBalance = (database: Database): Record<string, number | undefined> => {
+    return database.reduce((acc, {from, to, payment}) => ({
+        ...acc,
+        [from]: (acc[from] ?? 0) - payment,
+        [to]: (acc[to] ?? 0) + payment
+    }), {} as Record<string, number | undefined>)
 }
 
 
+const splitPayments = (people: Array<string>, initialPayments: Array<{
+    from: string,
+    amount: number | Record<string, number>
+}>): {
+    initialBalance: Record<string, number | undefined>,
+    paymentsForBalance: Database
+} => {
+    const database: Database = initialPayments.flatMap(({amount, from}) => {
+        if (typeof amount === 'number') {
+            return people.filter(x => x !== from).map(to => ({
+                from,
+                to,
+                payment: amount / people.length
+            }))
+        }
+        return Object.entries(amount).map(([to, payment]) => ({
+            from, to, payment
+        }))
+    })
+    const initialBalance = getBalance(database)
+
+    const paymentsForBalance: Database = []
+
+
+    return {initialBalance, paymentsForBalance}
+}
+
+test('simple case', () => {
+    const output = splitPayments(
+        ['meris', 'henrietta'],
+        [
+            {from: 'meris', amount: 100},
+        ])
+    expect(output.initialBalance).toStrictEqual({
+            henrietta: 50,
+            meris: -50,
+        }
+    )
+
+
+})
+
+
+test('simple case', () => {
+    const output = splitPayments(
+        ['meris', 'henrietta'],
+        [
+            {from: 'meris', amount: 100},
+            {from: 'henrietta', amount: {meris: 50}},
+        ])
+    expect(output.initialBalance).toStrictEqual({
+            henrietta: 0,
+            meris: 0,
+        }
+    )
+
+
+})
+
+
 test('splits wisely', () => {
-    const simpleExample = {
-        'meris': 300,
-        'henrietta': 150
-    }
-    const output = splitPayments(simpleExample)
-    expect(output.averageCost).toEqual(225)
-    expect(output.diffs.henrietta).toEqual(75)
-    expect(output.diffs.meris).toEqual(-75)
-    expect(output.debtsFrom.meris).toEqual({henrietta: 75})
-    expect(output.debtsFrom.henrietta).toEqual({})
+    const output = splitPayments(
+        ['meris', 'henrietta'],
+        [
+            {from: 'meris', amount: 200},
+            {from: 'henrietta', amount: 100},
+        ])
+    expect(output.initialBalance).toEqual({meris: -50, henrietta: 50})
+
 
 })
 
@@ -75,15 +90,28 @@ test('three way example', () => {
         'henrietta': 2,
         'sara': 0
     }
-    const output = splitPayments(simpleExample)
-    expect(output.averageCost).toEqual(3)
-    expect(output.diffs.henrietta).toEqual(1)
-    expect(output.diffs.meris).toEqual(-4)
-    expect(output.diffs.sara).toEqual(3)
-    expect(output.debtsFrom).toEqual({
-        'meris': {henrietta: 1, sara: 3},
-        'henrietta': {},
-        'sara': {}
-    })
+
+
+    const output = splitPayments(['meris', 'henrietta', 'sara'], [{from: 'meris', amount: 7}, {
+        from: 'henrietta',
+        amount: 2
+    }])
+    expect(output.initialBalance).toEqual({})
 })
 
+test.skip('real world test', () => {
+    const simpleExample = {
+        "tommy": 150,
+        "karin": 150,
+        "kina": 600,
+        "henrietta": 242.5 + 88,
+        "meris": 242.5 + 88,
+        "sara": 450,
+        "anna": 595,
+        "jens": 595,
+        "alex": 0,
+    }
+    const output = splitPayments(simpleExample)
+    expect(output.averageCost).toEqual(355.6666666666667)
+    expect(output.debtsFrom).toEqual({})
+})
