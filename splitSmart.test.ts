@@ -13,7 +13,7 @@ const getBalance = (database: Database): Record<string, number | undefined> => {
   );
 };
 
-const splitPayments = (
+const getKvitt = (
   people: Array<string>,
   initialPayments: Array<{
     from: string;
@@ -96,7 +96,7 @@ const splitPayments = (
 };
 
 test("simple case", () => {
-  const output = splitPayments(
+  const output = getKvitt(
     ["meris", "henrietta"],
     [{ from: "meris", amount: 100 }],
   );
@@ -107,7 +107,7 @@ test("simple case", () => {
 });
 
 test("simple case", () => {
-  const output = splitPayments(
+  const output = getKvitt(
     ["meris", "henrietta"],
     [
       { from: "meris", amount: 100 },
@@ -121,7 +121,7 @@ test("simple case", () => {
 });
 
 test("splits wisely", () => {
-  const output = splitPayments(
+  const output = getKvitt(
     ["meris", "henrietta"],
     [
       { from: "meris", amount: 200 },
@@ -132,7 +132,7 @@ test("splits wisely", () => {
 });
 
 test("simple three way example", () => {
-  const output = splitPayments(
+  const output = getKvitt(
     ["meris", "henrietta", "sara"],
     [
       {
@@ -157,7 +157,7 @@ test("simple three way example", () => {
 });
 
 test("three way example", () => {
-  const output = splitPayments(
+  const output = getKvitt(
     ["meris", "henrietta", "sara"],
     [
       {
@@ -200,7 +200,7 @@ test("real world test", () => {
   };
   const total = Object.values(simpleExample).reduce((acc, x) => acc + x, 0);
   const average = total / Object.keys(simpleExample).length;
-  const output = splitPayments(
+  const output = getKvitt(
     Object.keys(simpleExample),
     Object.entries(simpleExample).map(([from, amount]) => ({ from, amount })),
   );
