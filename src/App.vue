@@ -43,6 +43,13 @@ const formatNumber = (num: number) => {
           v-for="(member, index) in localState.party"
           :key="index"
           v-model="localState.party[index]"
+          @change="
+            (e) => {
+              if (e.target.value === '') {
+                localState.party.splice(index, 1)
+              }
+            }
+          "
         />
         <button @click="localState.party.push('')">Add member</button>
       </div>
@@ -70,14 +77,16 @@ const formatNumber = (num: number) => {
               name="payment-amount"
               id="payment-amount"
               v-model="payment.amount"
+              @change="
+                (e) => {
+                  const event = e.target as HTMLInputElement
+                  if (event.value === '' || event.value === '0') {
+                    localState.initialPayments.splice(index, 1)
+                  }
+                }
+              "
             />
           </div>
-          <button
-            class="remove-payment-button"
-            @click="localState.initialPayments.splice(index, 1)"
-          >
-            Remove
-          </button>
         </div>
         <button
           class="add-payment-button"
