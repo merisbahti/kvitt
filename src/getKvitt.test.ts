@@ -1,5 +1,5 @@
-import { getKvitt } from './getKvitt.ts'
 import { test, expect } from 'vitest'
+import { getKvitt } from './getKvitt'
 
 const deepStrictEqual = <A, B>(a: A, b: B) => {
   expect(a).toEqual(b)
