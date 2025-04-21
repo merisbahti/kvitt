@@ -1,4 +1,5 @@
-import { expect, test } from "bun:test";
+import { deepStrictEqual } from "node:assert";
+import { test } from "node:test";
 
 type Database = Array<{ from: string; to: string; payment: number }>;
 
@@ -100,7 +101,8 @@ test("simple case", () => {
     ["meris", "henrietta"],
     [{ from: "meris", amount: 100 }],
   );
-  expect(output.initialBalance).toStrictEqual({
+
+  deepStrictEqual(output.initialBalance, {
     henrietta: 50,
     meris: -50,
   });
@@ -114,7 +116,7 @@ test("simple case", () => {
       { from: "henrietta", amount: { meris: 50 } },
     ],
   );
-  expect(output.initialBalance).toStrictEqual({
+  deepStrictEqual(output.initialBalance, {
     henrietta: 0,
     meris: 0,
   });
@@ -128,7 +130,7 @@ test("splits wisely", () => {
       { from: "henrietta", amount: 100 },
     ],
   );
-  expect(output.initialBalance).toEqual({ meris: -50, henrietta: 50 });
+  deepStrictEqual(output.initialBalance, { meris: -50, henrietta: 50 });
 });
 
 test("simple three way example", () => {
@@ -141,12 +143,12 @@ test("simple three way example", () => {
       },
     ],
   );
-  expect(output.initialBalance).toEqual({
+  deepStrictEqual(output.initialBalance, {
     henrietta: 3,
     meris: -6,
     sara: 3,
   });
-  expect(output.paymentsForBalance).toEqual([
+  deepStrictEqual(output.paymentsForBalance, [
     { from: "henrietta", to: "meris", payment: 3 },
     {
       from: "sara",
@@ -170,12 +172,12 @@ test("three way example", () => {
       },
     ],
   );
-  expect(output.initialBalance).toEqual({
+  deepStrictEqual(output.initialBalance, {
     henrietta: 1.0000000000000004,
     meris: -4,
     sara: 3,
   });
-  expect(output.paymentsForBalance).toEqual([
+  deepStrictEqual(output.paymentsForBalance, [
     {
       from: "sara",
       to: "meris",
@@ -204,19 +206,53 @@ test("real world test", () => {
     Object.keys(simpleExample),
     Object.entries(simpleExample).map(([from, amount]) => ({ from, amount })),
   );
-  expect(total).toBe(3401);
-  expect(average).toBe(340.1);
-  // expect(output.initialBalance).toEqual({
-  //   alex: 355.66666666666663,
-  //   anna: -239.33333333333334,
-  //   henrietta: 25.166666666666657,
-  //   jens: -239.33333333333337,
-  //   karin: 205.66666666666666,
-  //   kina: -244.33333333333346,
-  //   meris: 25.166666666666657,
-  //   sara: -94.33333333333331,
-  //   tommy: 205.66666666666666,
-  // });
-
-  expect(output.paymentsForBalance).toEqual([]);
+  deepStrictEqual(total, 3401);
+  deepStrictEqual(average, 340.1);
+  deepStrictEqual(output.paymentsForBalance, [
+    {
+      from: "alex",
+      payment: 309.9,
+      to: "sara",
+    },
+    {
+      from: "mgk",
+      payment: 259.9,
+      to: "kina",
+    },
+    {
+      from: "tommy",
+      payment: 190.1,
+      to: "anna",
+    },
+    {
+      from: "karin",
+      payment: 190.1,
+      to: "jens",
+    },
+    {
+      from: "mgk",
+      payment: 64.79999999999998,
+      to: "anna",
+    },
+    {
+      from: "alex",
+      payment: 30.200000000000045,
+      to: "jens",
+    },
+    {
+      from: "mgk",
+      payment: 15.400000000000063,
+      to: "jens",
+    },
+    {
+      from: "henrietta",
+      payment: 9.600000000000023,
+      to: "jens",
+    },
+    {
+      from: "meris",
+      payment: 9.599999999999852,
+      to: "jens",
+    },
+  ]);
 });
