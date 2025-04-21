@@ -1,6 +1,9 @@
-import { deepStrictEqual } from 'node:assert'
-import { test } from 'node:test'
 import { getKvitt } from './getKvitt.ts'
+import { test, expect } from 'vitest'
+
+const deepStrictEqual = <A, B>(a: A, b: B) => {
+  expect(a).toEqual(b)
+}
 
 test('simple case', () => {
   const output = getKvitt(['meris', 'henrietta'], [{ from: 'meris', amount: 100 }])
