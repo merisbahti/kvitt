@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { getKvitt } from './getKvitt'
 
 type State = {
@@ -14,16 +14,8 @@ const localState = ref<State>({
   initialPayments: [{ from: 'meris', amount: 100 }],
 })
 
-const result = ref(getKvitt(localState.value.party, localState.value.initialPayments))
+const result = computed(() => getKvitt(localState.value.party, localState.value.initialPayments))
 
-watch(
-  localState,
-  () => {
-    result.value = getKvitt(localState.value.party, localState.value.initialPayments)
-    console.log(localState.value, result.value)
-  },
-  { deep: true, immediate: true },
-)
 // format nr to max 2 decimals
 const formatNumber = (num: number) => {
   return num.toLocaleString(undefined, {
@@ -45,7 +37,8 @@ const formatNumber = (num: number) => {
           v-model="localState.party[index]"
           @change="
             (e) => {
-              if (e.target.value === '') {
+              const event = e.target as HTMLInputElement
+              if (event.value === '') {
                 localState.party.splice(index, 1)
               }
             }
