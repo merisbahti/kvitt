@@ -72,6 +72,12 @@ const formatNumber = (num: number) => {
               v-model="payment.amount"
             />
           </div>
+          <button
+            class="remove-payment-button"
+            @click="localState.initialPayments.splice(index, 1)"
+          >
+            Remove
+          </button>
         </div>
         <button
           class="add-payment-button"
@@ -115,6 +121,10 @@ const formatNumber = (num: number) => {
 
 .add-payment-button {
   width: fit-content;
+}
+.remove-payment-button {
+  margin-top: auto;
+  height: fit-content;
 }
 
 .main-flow {
