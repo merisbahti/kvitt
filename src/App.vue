@@ -24,6 +24,13 @@ watch(
   },
   { deep: true, immediate: true },
 )
+// format nr to max 2 decimals
+const formatNumber = (num: number) => {
+  return num.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })
+}
 </script>
 
 <template>
@@ -74,6 +81,12 @@ watch(
         </button>
       </div>
     </div>
+    <div v-if="result.paymentsForBalance.length > 0">
+      <h2>Result</h2>
+      <div v-for="(payment, index) in result.paymentsForBalance" :key="index">
+        {{ payment.from }} should pay {{ formatNumber(payment.payment) }} to {{ payment.to }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -108,5 +121,8 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+select {
+  height: 100%;
 }
 </style>
