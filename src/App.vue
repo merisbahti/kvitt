@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { getKvitt } from './getKvitt'
+
 type State = {
   party: string[]
   initialPayments: Array<{
@@ -9,9 +10,20 @@ type State = {
   }>
 }
 const localState = ref<State>({
-  party: [],
-  initialPayments: [],
+  party: ['meris', 'henri'],
+  initialPayments: [{ from: 'meris', amount: 100 }],
 })
+
+const result = ref(getKvitt(localState.value.party, localState.value.initialPayments))
+
+watch(
+  localState,
+  () => {
+    result.value = getKvitt(localState.value.party, localState.value.initialPayments)
+    console.log(localState.value, result.value)
+  },
+  { deep: true, immediate: true },
+)
 </script>
 
 <template>
@@ -46,7 +58,12 @@ const localState = ref<State>({
           </div>
           <div class="payment-input">
             <label for="payment-amount">Amount</label>
-            <input type="text" name="payment-amount" id="payment-amount" v-model="payment.amount" />
+            <input
+              type="number"
+              name="payment-amount"
+              id="payment-amount"
+              v-model="payment.amount"
+            />
           </div>
         </div>
         <button
