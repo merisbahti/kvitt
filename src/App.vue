@@ -9,7 +9,6 @@ import TheWelcome from './components/TheWelcome.vue'
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
-      <HelloWorld poop="You did it 2!" />
     </div>
   </header>
 
