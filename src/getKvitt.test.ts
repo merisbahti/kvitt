@@ -6,59 +6,59 @@ const deepStrictEqual = <A, B>(a: A, b: B) => {
 }
 
 test('simple case', () => {
-  const output = getKvitt(['meris', 'henrietta'], [{ from: 'meris', amount: 100 }])
+  const output = getKvitt(['m', 'h'], [{ from: 'm', amount: 100 }])
 
   deepStrictEqual(output.initialBalance, {
-    henrietta: 50,
-    meris: -50,
+    h: 50,
+    m: -50,
   })
 })
 
 test('simple case', () => {
   const output = getKvitt(
-    ['meris', 'henrietta'],
+    ['m', 'h'],
     [
-      { from: 'meris', amount: 100 },
-      { from: 'henrietta', amount: { meris: 50 } },
+      { from: 'm', amount: 100 },
+      { from: 'h', amount: { m: 50 } },
     ],
   )
   deepStrictEqual(output.initialBalance, {
-    henrietta: 0,
-    meris: 0,
+    h: 0,
+    m: 0,
   })
 })
 
 test('splits wisely', () => {
   const output = getKvitt(
-    ['meris', 'henrietta'],
+    ['m', 'h'],
     [
-      { from: 'meris', amount: 200 },
-      { from: 'henrietta', amount: 100 },
+      { from: 'm', amount: 200 },
+      { from: 'h', amount: 100 },
     ],
   )
-  deepStrictEqual(output.initialBalance, { meris: -50, henrietta: 50 })
+  deepStrictEqual(output.initialBalance, { m: -50, h: 50 })
 })
 
 test('simple three way example', () => {
   const output = getKvitt(
-    ['meris', 'henrietta', 'sara'],
+    ['m', 'h', 's'],
     [
       {
-        from: 'meris',
+        from: 'm',
         amount: 9,
       },
     ],
   )
   deepStrictEqual(output.initialBalance, {
-    henrietta: 3,
-    meris: -6,
-    sara: 3,
+    h: 3,
+    m: -6,
+    s: 3,
   })
   deepStrictEqual(output.paymentsForBalance, [
-    { from: 'henrietta', to: 'meris', payment: 3 },
+    { from: 'h', to: 'm', payment: 3 },
     {
-      from: 'sara',
-      to: 'meris',
+      from: 's',
+      to: 'm',
       payment: 3,
     },
   ])
@@ -66,44 +66,44 @@ test('simple three way example', () => {
 
 test('three way example', () => {
   const output = getKvitt(
-    ['meris', 'henrietta', 'sara'],
+    ['m', 'h', 's'],
     [
       {
-        from: 'meris',
+        from: 'm',
         amount: 7,
       },
       {
-        from: 'henrietta',
+        from: 'h',
         amount: 2,
       },
     ],
   )
   deepStrictEqual(output.initialBalance, {
-    henrietta: 1.0000000000000004,
-    meris: -4,
-    sara: 3,
+    h: 1.0000000000000004,
+    m: -4,
+    s: 3,
   })
   deepStrictEqual(output.paymentsForBalance, [
     {
-      from: 'sara',
-      to: 'meris',
+      from: 's',
+      to: 'm',
       payment: 3,
     },
-    { from: 'henrietta', to: 'meris', payment: 1 },
+    { from: 'h', to: 'm', payment: 1 },
   ])
 })
 
 test('real world test', () => {
   const simpleExample = {
-    tommy: 150,
-    karin: 150,
-    kina: 600,
-    henrietta: 242.5 + 88,
-    meris: 242.5 + 88,
-    sara: 650,
-    anna: 595,
-    jens: 595,
-    alex: 0,
+    t: 150,
+    k: 150,
+    ki: 600,
+    h: 242.5 + 88,
+    m: 242.5 + 88,
+    s: 650,
+    a: 595,
+    j: 595,
+    al: 0,
     mgk: 0,
   }
   const total = Object.values(simpleExample).reduce((acc, x) => acc + x, 0)
@@ -116,49 +116,49 @@ test('real world test', () => {
   deepStrictEqual(average, 340.1)
   deepStrictEqual(output.paymentsForBalance, [
     {
-      from: 'alex',
+      from: 'al',
       payment: 309.9,
-      to: 'sara',
+      to: 's',
     },
     {
       from: 'mgk',
       payment: 259.9,
-      to: 'kina',
+      to: 'ki',
     },
     {
-      from: 'tommy',
+      from: 't',
       payment: 190.1,
-      to: 'anna',
+      to: 'a',
     },
     {
-      from: 'karin',
+      from: 'k',
       payment: 190.1,
-      to: 'jens',
+      to: 'j',
     },
     {
       from: 'mgk',
       payment: 64.79999999999998,
-      to: 'anna',
+      to: 'a',
     },
     {
-      from: 'alex',
+      from: 'al',
       payment: 30.200000000000045,
-      to: 'jens',
+      to: 'j',
     },
     {
       from: 'mgk',
       payment: 15.400000000000063,
-      to: 'jens',
+      to: 'j',
     },
     {
-      from: 'henrietta',
+      from: 'h',
       payment: 9.600000000000023,
-      to: 'jens',
+      to: 'j',
     },
     {
-      from: 'meris',
+      from: 'm',
       payment: 9.599999999999852,
-      to: 'jens',
+      to: 'j',
     },
   ])
 })
