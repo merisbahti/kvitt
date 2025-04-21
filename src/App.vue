@@ -101,17 +101,19 @@ const formatNumber = (num: number) => {
   display: flex;
   flex-direction: row;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 .payments {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .payment-row {
   display: flex;
   flex-direction: row;
-  gap: 1rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .payment-input {
